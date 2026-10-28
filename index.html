@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Real Search | Newsletter</title>
+<style>
+:root{color-scheme:light;--gold:#ae8950;--ink:#232620;--paper:#f6f3ec}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,sans-serif}header,main,footer{max-width:1200px;margin:auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #ddd5c5}.brand{font-weight:750;letter-spacing:.2em;font-size:20px;color:#89652f}.edition{font-size:12px;letter-spacing:.16em;text-transform:uppercase}h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(32px,5vw,52px);line-height:1.15;margin:12px 0}p{margin:8px 0 20px}.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:white;padding:16px;border:1px solid #ded7c9;border-radius:12px;margin:24px 0}button,.link{display:inline-block;font:inherit;border:1px solid #c9b99a;border-radius:7px;padding:9px 16px;text-decoration:none;background:white;color:var(--ink);cursor:pointer}button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:3px}label{display:inline-flex;align-items:center;gap:8px}input[type=range]{width:110px;accent-color:var(--gold)}#status{flex-basis:100%;font-size:14px;color:#675b46;margin:0}[hidden]{display:none!important}iframe{display:block;width:100%;height:78vh;min-height:480px;border:1px solid #d3cab9;border-radius:8px;background:#fff}details{margin:24px 0;padding:16px;border:1px solid #ded7c9;border-radius:8px}summary{cursor:pointer;font-weight:600}.setup{display:flex;gap:20px;flex-wrap:wrap;margin:16px 0}.setup label{display:block}.setup input{display:block;max-width:100%}footer{font-size:13px;color:#6e675b}small{display:block;margin-top:12px}@media(max-width:600px){header,main,footer{padding:18px}.edition{font-size:10px}iframe{height:70vh;min-height:400px}.toolbar{gap:10px}.link,button{padding:9px 12px}}
+</style>
+</head>
+<body>
+<header><div class="brand">REAL SEARCH</div><span class="edition">Company newsletter</span></header>
+<main>
+<h1>A moment to explore.</h1><p>Open our latest newsletter and enjoy a little background music as you read.</p>
+<div class="toolbar" aria-label="Reading controls">
+<button class="primary" id="play" type="button">Open newsletter</button>
+<label>Volume <input id="volume" aria-label="Music volume" type="range" min="0" max="1" step="0.05" value="0.25"></label>
+<a class="link" id="download" href="newsletter.pdf" download>Download PDF</a>
+<a class="link" id="open" href="newsletter.pdf" target="_blank" rel="noopener">Open PDF</a>
+<p id="status" role="status" aria-live="polite">Tap “Open newsletter” to open the pages with background music.</p>
+</div>
+<iframe hidden id="reader" title="Real Search newsletter PDF" src="newsletter.pdf#view=FitH"></iframe>
+<small>If your browser cannot display the PDF here, use “Open PDF”. Opening it in another app may interrupt music.</small>
+<details id="setup"><summary>Preview your own files / setup</summary>
+<p>For hosting, put <strong>index.html</strong>, <strong>newsletter.pdf</strong> and <strong>music.mp3</strong> in the same folder. Use music you have permission to publish. This template includes no PDF or music.</p>
+<p>To preview on your computer, select files below. These selections stay in this browser session; they do not upload or embed files in the HTML.</p>
+<div class="setup"><label>Newsletter PDF<input id="pdfFile" type="file" accept="application/pdf,.pdf"></label><label>Background music<input id="musicFile" type="file" accept="audio/*"></label></div>
+<p>Optional cover image: add <strong>cover.jpg</strong> to your published folder, then use this in an email or webpage:</p>
+<code>&lt;a href="YOUR-PUBLISHED-PAGE-URL"&gt;&lt;img src="YOUR-PUBLISHED-PAGE-URL/cover.jpg" alt="Read our newsletter" width="600"&gt;&lt;/a&gt;</code>
+</details>
+</main><footer>Real Search · Read at your own pace.</footer>
+<audio id="music" src="music.mp3" loop preload="none"></audio>
+<script>
+'use strict';
+const audio=document.getElementById('music'),play=document.getElementById('play'),status=document.getElementById('status');
+let pdfURL=null,musicURL=null,opened=false;
+audio.volume=.25;
+function sync(){play.textContent=!opened?'Open newsletter':audio.paused?'Resume music':'Pause music';play.setAttribute('aria-pressed',String(!audio.paused));}
+sync();
+play.addEventListener('click',async()=>{opened=true;document.getElementById('reader').hidden=false;if(!audio.paused){audio.pause();status.textContent='Music paused. Continue reading at your own pace.';return;}try{await audio.play();status.textContent='Music playing quietly on repeat. Scroll the newsletter to read.';}catch(e){status.textContent='Music could not start. Add music.mp3 beside index.html, or choose a playable audio file below.';document.getElementById('setup').open=true;}sync();});
+audio.addEventListener('play',sync);audio.addEventListener('pause',sync);
+audio.addEventListener('error',()=>{status.textContent='Music file unavailable or unsupported. Choose an audio file in setup, or check music.mp3.';sync();});
+document.getElementById('volume').addEventListener('input',e=>{audio.volume=Number(e.target.value);});
+document.getElementById('pdfFile').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(pdfURL)URL.revokeObjectURL(pdfURL);pdfURL=URL.createObjectURL(file);document.getElementById('reader').src=pdfURL+'#view=FitH';document.getElementById('download').href=pdfURL;document.getElementById('download').download=file.name;document.getElementById('open').href=pdfURL;});
+document.getElementById('musicFile').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;audio.pause();if(musicURL)URL.revokeObjectURL(musicURL);musicURL=URL.createObjectURL(file);audio.src=musicURL;audio.load();status.textContent='Music selected. Use the newsletter button to start reading with music.';sync();});
+if(location.protocol==='file:')document.getElementById('setup').open=true;
+</script>
+</body>
+</html>
